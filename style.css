@@ -241,3 +241,70 @@ button:disabled {
     padding: 1rem;
     border-radius: 10px;
 }
+
+.feedback-section {
+    margin-top: 2.5rem;
+    padding: 1.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.feedback-section h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+}
+
+.feedback-copy {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    margin-bottom: 0.85rem;
+}
+
+.feedback-input {
+    width: 100%;
+    resize: vertical;
+    min-height: 96px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    padding: 0.9rem 1rem;
+    font: inherit;
+    outline: none;
+}
+
+.feedback-input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+.feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+}
+
+.feedback-status {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    min-height: 1.2em;
+}
+
+@media (max-width: 640px) {
+    .input-group,
+    .feedback-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lang-toggle,
+    button {
+        width: 100%;
+    }
+
+    .top-bar {
+        justify-content: flex-start;
+    }
+}
