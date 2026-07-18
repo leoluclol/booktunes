@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookTunes — Reading Playlists</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Link your new stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="language-switch" role="group" aria-label="Language switch">
+                <button type="button" class="lang-toggle active" data-lang="en">EN</button>
+                <button type="button" class="lang-toggle" data-lang="it">IT</button>
+            </div>
+        </div>
+
+        <h1>📚 BookTunes - Reading playlists 🎧</h1>
+        
+        <div class="input-group">
+            <input type="text" id="bookInput" placeholder="Enter a book title..." autocomplete="off">
+            <button id="getSongsBtn">Get Playlist</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                placeholder: 'Enter a book title...',
+                button: 'Get Playlist',
+                loading: 'Curating the perfect reading atmosphere...',
+                serverError: 'Failed to communicate with the server. Is PHP running?',
+                emptyBook: 'Please enter a book title.',
+                aboutBook: 'About the book'
+            },
+            it: {
+                placeholder: 'Inserisci il titolo di un libro...',
+                button: 'Crea playlist',
+                loading: 'Sto creando l’atmosfera perfetta per la lettura...',
+                serverError: 'Impossibile contattare il server. PHP è in esecuzione?',
+                emptyBook: 'Inserisci il titolo di un libro.',
+                aboutBook: 'Sul libro'
+            }
+        };
+
+        function getCurrentLanguage() {
+            return $('.lang-toggle.active').data('lang') || 'en';
+        }
+
+        function setLanguage(lang) {
+            const selectedLang = translations[lang] ? lang : 'en';
+            const strings = translations[selectedLang];
+
+            document.documentElement.lang = selectedLang === 'it' ? 'it' : 'en';
+            $('#bookInput').attr('placeholder', strings.placeholder);
+            $('#getSongsBtn').text(strings.button);
+            $('.lang-toggle').removeClass('active');
+            $(`.lang-toggle[data-lang="${selectedLang}"]`).addClass('active');
+        }
+
+        $(document).ready(function() {
+            setLanguage('en');
+
+            $('.lang-toggle').on('click', function() {
+                setLanguage($(this).data('lang'));
+            });
+
+            $('#getSongsBtn').on('click', function() {
+                const book = $('#bookInput').val().trim();
+                const lang = getCurrentLanguage();
+                const strings = translations[lang];
+
+                if (!book) {
+                    $('#results').html(`<p class="error-text">${strings.emptyBook}</p>`);
+                    return;
+                }
+
+                $('#results').html(`<p class="status-text">${strings.loading}</p>`);
+                $('#getSongsBtn').prop('disabled', true);
+
+                $.ajax({
+                    url: 'get_playlist.php',
+                    method: 'POST',
+                    data: { book: book, lang: lang },
+                    dataType: 'json',
+                    success: function(response) {
+                        $('#results').empty();
+                        
+                        if (response.error) {
+                            $('#results').html(`<p class="error-text">${response.error}</p>`);
+                            return;
+                        }
+
+                        if (response.description) {
+                            $('#results').append(`
+                                <div class="book-description">
+                                    <h2>${translations[getCurrentLanguage()].aboutBook}</h2>
+                                    <p>${response.description}</p>
+                                </div>
+                            `);
+                        }
+                        
+                        response.tracks.forEach(function(track) {
+                            $('#results').append(`
+                                <div class="track">
+                                    <div class="track-title">${track.title} — ${track.artist}</div>
+                                    <div class="track-reason">${track.reason}</div>
+                                </div>
+                            `);
+                        });
+                    },
+                    error: function() {
+                        $('#results').html(`<p class="error-text">${translations[getCurrentLanguage()].serverError}</p>`);
+                    },
+                    complete: function() {
+                        $('#getSongsBtn').prop('disabled', false);
+                    }
+                });
+            });
+            
+            $('#bookInput').on('keypress', function(e) {
+                if (e.which === 13) $('#getSongsBtn').click();
+            });
+        });
+    </script>
+</body>
+</html> 
